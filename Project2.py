@@ -14,8 +14,24 @@ def get_titles_from_search_results(filename):
 
     [('Book title 1', 'Author 1'), ('Book title 2', 'Author 2')...]
     """
+    f=open(filename, 'r')
+    fileData= f.read()
+    f.close()
 
-    pass
+    soup= BeautifulSoup(fileData, 'lxml')
+    bookTitles= soup.find_all('a', class_= 'bookTitle')
+    bookInfo= []
+    for tag in bookTitles:
+        bookInfo.append(tag.text.strip())
+    authorsList=[]
+    authorTags=soup.find_all('div', class_='authorName__container')
+    for item in authorTags:
+        authorsList.append(item.text.strip())
+        information=[]
+        for i in range(len(bookTitles)):
+            tup=(bookInfo[i], authorsList[i])
+            information.append(tup)
+        return information
 
 
 def get_search_links():
