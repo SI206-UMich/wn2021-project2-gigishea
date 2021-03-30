@@ -48,9 +48,18 @@ def get_search_links():
 
     """
 
-    pass
-
-
+    url_lst= []
+    url= 'https://www.goodreads.com/search?q=fantasty&qid=NwUsLiA2Nc"
+    r=requests.get(url)
+    soup= BeautifulSoup(r.text, 'html.parser')
+    anchor= soup.find_all('a', class_= 'bookTitle')
+    for x in anchor:
+        link= x['href']
+        if link.startswith('/book/show/'):
+            i='https://www.goodreads.com'+ str(link)
+            url_lst.append(i)
+    return url_lst[:10]
+    
 def get_book_summary(book_url):
     """
     Write a function that creates a BeautifulSoup object that extracts book
@@ -79,7 +88,29 @@ def summarize_best_books(filepath):
     ("Fiction", "The Testaments (The Handmaid's Tale, #2)", "https://www.goodreads.com/choiceawards/best-fiction-books-2020") 
     to your list of tuples.
     """
-    pass
+    clist=[]
+    blist=[]
+    ulist=[]
+    tups=[]
+
+    file1= open(filepath, 'r')
+    data= file1.read()
+    file1.close()
+    soup=BeautifulSoup(data, "html.parser")
+    cats=soup.find_all('h4', class_= 'category__copy')
+    for category in cats:
+        clist.append(category.text.strip())
+    bestb=soup.find_all('img', class_= "category__winnerImage")
+    for book in bestb:
+        title=book['alt']
+        blist.append(title)
+    urls= soup.find_all('div', class_= 'category clearFix')
+    for url in urls:
+        ulist.append(url.find('a')['href'])
+    for x in range(len(ulist)):
+        tup= (clist[x],blist[x], ulist[x])
+        tups.append(tup)
+    return tups
 
 
 def write_csv(data, filename):
@@ -121,17 +152,18 @@ class TestCases(unittest.TestCase):
 
     def test_get_titles_from_search_results(self):
         # call get_titles_from_search_results() on search_results.htm and save to a local variable
-
+        get_titles_from_search_results('search_results.htm')
         # check that the number of titles extracted is correct (20 titles)
-
+        self.assertEqual(len(search_urls), 20)
         # check that the variable you saved after calling the function is a list
-
+        self.assertIsInstance(search_urls, list)
         # check that each item in the list is a tuple
-
+        for x in search_urls:
+            self.assertIsInstance(x, tuple)
         # check that the first book and author tuple is correct (open search_results.htm and find it)
-
+        self.assertEqual(search_urls[0], ("Harry Potter and the Deathly Hallows (Harry Potter #7)", 'J.K. Rowling'))
         # check that the last title is correct (open search_results.htm and find it)
-
+        self.assertEqual(search_urls[-1][0], 'Harry Potter: The Prequel (Harry Potter, #0.5)')
     def test_get_search_links(self):
         # check that TestCases.search_urls is a list
 
