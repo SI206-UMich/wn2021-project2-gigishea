@@ -36,7 +36,7 @@ def get_titles_from_search_results(filename):
     return information
 
 
-def get_search_links():
+def get_search_links(): 
     """
     Write a function that creates a BeautifulSoup object after retrieving content from
     "https://www.goodreads.com/search?q=fantasy&qid=NwUsLiA2Nc". Parse through the object and return a list of
@@ -75,25 +75,18 @@ def get_book_summary(book_url):
     You can easily capture CSS selectors with your browser's inspector window.
     Make sure to strip() any newlines from the book title and number of pages.
     """
-    bookList=[]
-    authorsList=[]
-    pagesList=[]
-    summary=()
-    resp=requests.get(book_url)
-    soup=BeautifulSoup(resp.content, 'html.parser')
-    bookTitles=soup.find_all('h1', class_="gr-h1 gr-h1--serif")
-    for book in bookTitles:
-        bookList.append(book.text.strip())
-    authors=soup.find_all('span', itemprop="name")
-    for author in authors:
-        authorsList.append(author.text.strip())
+    r=requests.get(book_url)
+    soup= BeautifulSoup(r.text, 'lxml')
+    anchor= soup.find('h1', class_='gr-h1 gr-h1--serif')
 
-    pages= soup.find_all('span', itemprop="numberOfPages")
-    for page in pages:
-        pagesList.append(int(page.text.strip(' pages')))
-    for i in range(1):
-        summary=(bookList[i], authorsList[i], pagesList[i])
-    return summary
+    title= anchor.text.strip()
+    anchor2=soup.find('a', class_='authorName')
+
+    author= anchor2.text.strip()
+    anchor3= soup.find('span', itemprop='numberOfPages')
+    page_count= int(anchor3.text.strip(' pages'))
+    tup= (title, author, page_count)
+    return tup
 
    
 
@@ -219,19 +212,16 @@ class TestCases(unittest.TestCase):
         for x in summaries:
             self.assertEqual(type(x), tuple)
             self.assertEqual(len(x), 3)
-            self.assertEqual(type(x[0]), str)
-            self.assertEqual(type(x[1]), str)
-            self.assertEqual(type(x[2]), int)
-        self.assertEqual(summaries[0][2], 337)
+            
             # check that each tuple has 3 elements
 
             # check that the first two elements in the tuple are string
-        #self.assertIsInstance(summaries[0][0], str)
-        #self.assertIsInstance(summaries[0][1], str)            
+        self.assertIsInstance(summaries[0][0], str)
+        self.assertIsInstance(summaries[0][1], str)            
                     # check that the third element in the tuple, i.e. pages is an int
-        #self.assertIsInstance(summaries[0][2], int)
+        self.assertIsInstance(summaries[0][2], int)
             # check that the first book in the search has 337 pages
-        #self.assertEqual(summaries[0][2], 337)
+        self.assertEqual(summaries[0][2], 337)
 
     def test_summarize_best_books(self):
         # call summarize_best_books and save it to a variable
